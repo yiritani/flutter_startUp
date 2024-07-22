@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:untitled1/model/memo.dart';
+import 'package:untitled1/pages/add_memo_page.dart';
+import 'package:untitled1/pages/memo_detail.dart';
 
 
 class TopPage extends StatefulWidget {
@@ -12,30 +14,7 @@ class TopPage extends StatefulWidget {
 }
 
 class _TopPageState extends State<TopPage> {
-  List<Memo> memoList = [
-    Memo(title: 'aaaaaa', text: 'bbbbbbbbb', createdDate: Timestamp.now()),
-  ];
-
-  Future<void> fetchMemoList() async {
-    final memoCollection = await FirebaseFirestore.instance.collection('memo').get();
-    final docs = memoCollection.docs;
-    for (final doc in docs) {
-      final data = doc.data();
-      Memo fetchMemo = Memo(
-        title: data['title'],
-        text: data['detail'],
-        createdDate: data['createdDate'],
-      );
-      memoList.add(fetchMemo);
-    }
-    setState(() {});
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    fetchMemoList();
-  }
+  final memoCollection = FirebaseFirestore.instance.collection('memo');
 
   @override
   Widget build(BuildContext context) {
@@ -44,17 +23,39 @@ class _TopPageState extends State<TopPage> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(widget.title),
       ),
-      body: ListView.builder(
-        itemCount: memoList.length,
-        itemBuilder: (context, index) {
-          return ListTile(
-            title: Text(memoList[index].title),
-            subtitle: Text(memoList[index].text),
+      body: StreamBuilder<QuerySnapshot>(
+        stream: memoCollection.snapshots(),
+        builder: (context, snapshot) {
+          if(snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if(!snapshot.hasData) {
+            return const Center(child: Text('No data'));
+          }
+          final docs = snapshot.data!.docs;
+          return ListView.builder(
+            itemCount: docs.length,
+            itemBuilder: (context, index) {
+              final Memo fetchMemo = Memo(
+                title: docs[index]['title'],
+                text: docs[index]['detail'],
+                createdDate: docs[index]['createdDate'],
+              );
+              return ListTile(
+                title: Text(fetchMemo.title),
+                subtitle: Text(fetchMemo.text),
+                onTap: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => MemoDetailPage(fetchMemo)));
+                },
+              );
+            },
           );
-        },
+        }
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () {
+          Navigator.push(context, MaterialPageRoute(builder: (context) => const AddMemoPage()));
+        },
         tooltip: 'Increment',
         child: const Icon(Icons.add),
       ),
