@@ -43,6 +43,28 @@ class _TopPageState extends State<TopPage> {
               );
               return ListTile(
                 title: Text(fetchMemo.title),
+                trailing: IconButton(
+                  icon: const Icon(Icons.edit),
+                  onPressed: () async {
+                    showModalBottomSheet(context: context, builder: (context) {
+                      return const SafeArea(
+                        child:  Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            ListTile(
+                              leading: Icon(Icons.edit),
+                              title: Text('Edit'),
+                            ),
+                            ListTile(
+                              leading: Icon(Icons.delete),
+                              title: Text('Delete'),
+                            )
+                          ],
+                        )
+                      );
+                    });
+                  },
+                ),
                 subtitle: Text(fetchMemo.text),
                 onTap: () {
                   Navigator.push(context, MaterialPageRoute(builder: (context) => MemoDetailPage(fetchMemo)));
