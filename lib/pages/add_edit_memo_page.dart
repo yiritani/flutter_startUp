@@ -1,8 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:untitled1/model/memo.dart';
 
 class AddMemoPage extends StatefulWidget {
-  const AddMemoPage({super.key});
+  final Memo? currentMemo;
+  const AddMemoPage({super.key, this.currentMemo});
 
   @override
   State<AddMemoPage> createState() => _AddMemoPageState();
@@ -21,11 +23,29 @@ class _AddMemoPageState extends State<AddMemoPage> {
     });
   }
 
+  Future<void> editMemo() async {
+    final memoCollection = FirebaseFirestore.instance.collection('memo');
+    await memoCollection.doc(widget.currentMemo!.id).update({
+      'title': titleController.text,
+      'detail': textController.text,
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    if(widget.currentMemo != null) {
+      titleController.text = widget.currentMemo!.title;
+      textController.text = widget.currentMemo!.text;
+    }
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add Memo'),
+        title: Text(widget.currentMemo == null ? 'Add Memo' : 'Edit Memo'),
       ),
       body: Center(
         child: Column(
@@ -53,10 +73,14 @@ class _AddMemoPageState extends State<AddMemoPage> {
               alignment: Alignment.center,
               child: ElevatedButton(
                   onPressed: () async {
-                    await addMemo();
+                    if(widget.currentMemo == null) {
+                      await addMemo();
+                    } else {
+                      await editMemo();
+                    }
                     Navigator.pop(context);
                   },
-                  child: const Text('Add Memo')
+                  child: Text(widget.currentMemo == null ? 'Add' : 'Edit')
               ),
             )
           ],

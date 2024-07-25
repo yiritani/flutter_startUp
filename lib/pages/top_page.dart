@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:untitled1/model/memo.dart';
-import 'package:untitled1/pages/add_memo_page.dart';
+import 'package:untitled1/pages/add_edit_memo_page.dart';
 import 'package:untitled1/pages/memo_detail.dart';
 
 
@@ -37,6 +37,7 @@ class _TopPageState extends State<TopPage> {
             itemCount: docs.length,
             itemBuilder: (context, index) {
               final Memo fetchMemo = Memo(
+                id: docs[index].id,
                 title: docs[index]['title'],
                 text: docs[index]['detail'],
                 createdDate: docs[index]['createdDate'],
@@ -47,12 +48,16 @@ class _TopPageState extends State<TopPage> {
                   icon: const Icon(Icons.edit),
                   onPressed: () async {
                     showModalBottomSheet(context: context, builder: (context) {
-                      return const SafeArea(
+                      return SafeArea(
                         child:  Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             ListTile(
                               leading: Icon(Icons.edit),
+                              onTap: () {
+                                Navigator.pop(context);
+                                Navigator.push(context, MaterialPageRoute(builder: (context) => AddMemoPage(currentMemo: fetchMemo)));
+                              },
                               title: Text('Edit'),
                             ),
                             ListTile(
