@@ -62,6 +62,10 @@ class _TopPageState extends State<TopPage> {
                             ),
                             ListTile(
                               leading: Icon(Icons.delete),
+                              onTap: () async {
+                                await memoCollection.doc(fetchMemo.id).delete();
+                                Navigator.pop(context);
+                              },
                               title: Text('Delete'),
                             )
                           ],
